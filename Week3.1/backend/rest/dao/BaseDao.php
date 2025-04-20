@@ -2,36 +2,32 @@
 require_once __DIR__ . '/../config.php';
 
 class BaseDao {
-    protected $table;
-    protected $connection;
-
-    // CONSTRUCTOR
     public function __construct($table) {
         $this->table = $table;
-        $this->connection = Database::connect(); // from config.php - we use it in `require_once`
+        $this->connection = Database::connect();
     }
 
-    // Get All
+    // (R)ead
     public function getAll() {
-        $stmt = $this->connection->prepare("SELECT * FROM ".$this->table);
-        $stmt->execute();
-        return $stmt->fetchAll();
+        $stmt = $this->connection->prepare("SELECT * FROM ". $this->table);
+        $stmt->execute(); // it sends to a SERVER and Executes it
+        return $stmt->fetchAll(); // returns all values as associate array (PDO::FETCH_ASSOC from config.php)
     }
 
-    // Get By Id
-    public function getById($id) {
-        $stmt = $this->connection->prepare("SELECT * FROM".$this->table."WHERE id = :id");
-        $stmt->bindParam(":id", $id);
+    // (R)ead also
+    public function get_by_id($id) {
+        $stmt = $this->connection->prepare("SELECT * FROM " . $this->table . " WHERE id = :id");
+        $stmt->bindParam(':id',$id);
         $stmt->execute();
         return $stmt->fetch();
     }
 
-    // Insert
+    // (C)reate 
     public function insert($data) {
-        $columns = implode(", ",array_keys($data));
-        
-    }
+        $columns = implode(", ", array_keys($data)); // spaja sve elemente iz array u jedan string, sa seperatorom
+        $placeholders = ":".implode(", :", array_keys($data));
+        $sql = "INSERT INTO " . $this->table . " ($columns) VALUES ($placeholders)";
+        $stmt = this->connection->prepare($sql);
+        return $stmt->execute($data);
+        }
 }
-
-
-?>
